@@ -1,10 +1,10 @@
 # slapd acl
-slapd olcAccess (ACLs) utility
+slapd olcAccess (ACLs) utility, your olcAccess in a human readable way.
 
-Your olcAccess in a human readable way.
 
 #### Requirements
 ldapsearch
+
 
 #### Setup
 ````
@@ -34,6 +34,7 @@ optional arguments:
 
 #### Modify ldif
 `-ldif` option make the output in a ldif modify format. 
+
 
 #### Example
 ````
