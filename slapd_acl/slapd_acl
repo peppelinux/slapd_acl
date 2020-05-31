@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+import base64
+import os
+import sys
+
+
+LDAP_MOD_LDIF = """dn: olcDatabase={}
+changeType: modify
+replace: olcAccess
+{}
+"""
+
+def get_acl_as_list(ldap_search_cmd, encoding='utf-8'):
+    rs = os.popen(ldap_search_cmd).read()
+    acls = [base64.b64decode(i.replace(' ', '')\
+                              .replace('\n', '')).decode(encoding)
+            for i in rs.split('olcAccess::')[1:]]
+    return acls
+
+def get_acl_mod_ldif_by80(acls):
+    new_acls = []
+    for i in acls:
+        cnt = 0
+        new_str = ''
+        for e in i:
+            if cnt < 80:
+                new_str += e
+                cnt += 1
+            else:
+                new_str += ' \n '
+                new_str += e
+                cnt = 0
+        new_acls.append(new_str)
+    return '\n'.join(new_acls)
+
+
+def get_acl_as_ldif(acls, mod=False):
+    new_acls = []
+    for i in acls:
+        new_acls.append(' \n by'.join(i.split('by')))
+    res = '\n'.join(new_acls)
+    if mod:
+        return LDAP_MOD_LDIF.format('#CHANGEME#', res)
+    else:
+        return res
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-H', required=False,
+                        default="ldapi:///",
+                        help="Base LDAP Search")
+    parser.add_argument('-Y', required=False,
+                    default="EXTERNAL",
+                    help="SASL mechanism")
+    parser.add_argument('-D', required=False,
+                        help="example cn:admin,dc=example,dc=org")
+    parser.add_argument('-w', required=False,
+                        help="the user password")
+    parser.add_argument('-b', required=False,
+                        default="olcDatabase={1}mdb,cn=config",
+                        help="Base LDAP Search")
+    parser.add_argument('-ldif', action='store_true',
+                        required=False,
+                        help="print a modify ldif")
+    parser.add_argument('-enc',
+                        required=False, default='utf-8',
+                        help="encoding")
+    args = parser.parse_args()
+
+
+    if args.D:
+        cred = '-D {} -w {}'.format(args.D, args.w)
+    else:
+        cred = ''
+
+    if args.Y:
+        sasl_ext = '-Y {}'.format(args.Y)
+    else:
+        sasl_ext = ''
+
+    LDAP_OLC_ACL = "ldapsearch {} -H {} {} -b '{}' -s base 'olcAccess' -LLL".format(sasl_ext,
+                                                                                    args.H,
+                                                                                    cred,
+                                                                                    args.b)
+    print('Executing:\n {}\n'.format(LDAP_OLC_ACL))
+
+    acls = get_acl_as_list(LDAP_OLC_ACL, encoding=args.enc)
+    if args.ldif:
+        res = get_acl_as_ldif(acls, mod=1)
+    else:
+        res = get_acl_as_ldif(acls)
+
+    print()
+    if args.b:
+        print(res.replace('#CHANGEME#', args.b))
+    else:
+        print(res)
