@@ -2,6 +2,7 @@
 
 import base64
 import os
+import re
 import sys
 
 
@@ -41,6 +42,7 @@ def get_acl_as_ldif(acls, mod=False):
         new_acls.append('\n by'.join(i.split('by')))
     res = '\n'.join(new_acls)
     if mod:
+        res = re.sub('\{[0-9]+\}', 'olcAccess: ', res)
         return LDAP_MOD_LDIF.format('#CHANGEME#', res)
     else:
         return res

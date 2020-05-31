@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='slapd_acl',
-      version='0.1.3',
+      version='0.1.4',
       description="Slapd olcAccess (ACL) utility",
       long_description=readme(),
       long_description_content_type='text/markdown',
