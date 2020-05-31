@@ -15,7 +15,7 @@ setup(name='slapd_acl',
       author='Giuseppe De Marco',
       author_email='giuseppe.demarco@unical.it',
       license='Apache Software License',
-      scripts=['slapd_acl/slap_acl'],
+      scripts=['slapd_acl/slapd_acl'],
       packages=['slapd_acl'],
       install_requires=[],
      )
