@@ -14,12 +14,17 @@ pip3 install slapd_acl
 #### Usage
 using ldapi and mdb (default behaviour)
 ````
-slapd_acl
+slapd_acl -Y EXTERNAL
 ````
 
 specifing a base
 ````
-slapd_acl -b 'olcDatabase={0}config,cn=config'
+slapd_acl -Y EXTERNAL -b 'olcDatabase={0}config,cn=config'
+````
+
+remote connection
+````
+slapd_acl -H ldap://10.0.3.200 -D "cn=admin,dc=testunical,dc=it" -w slapdsecret -ldif
 ````
 
 using different paramenters
