@@ -14,9 +14,13 @@ replace: olcAccess
 
 def get_acl_as_list(ldap_search_cmd, encoding='utf-8'):
     rs = os.popen(ldap_search_cmd).read()
-    acls = [base64.b64decode(i.replace(' ', '')\
-                              .replace('\n', '')).decode(encoding)
-            for i in rs.split('olcAccess::')[1:]]
+    acls = []
+    for i in re.split('olcAccess::?', rs)[1:]:
+        i = re.sub(' ?\n ?', '', i.strip())
+        try:
+            acls.append(base64.b64decode(i).decode(encoding))
+        except:
+            acls.append(i)
     return acls
 
 def get_acl_mod_ldif_by80(acls):
@@ -39,7 +43,7 @@ def get_acl_mod_ldif_by80(acls):
 def get_acl_as_ldif(acls, mod=False):
     new_acls = []
     for i in acls:
-        new_acls.append('\n by'.join(i.split('by')))
+        new_acls.append('\n by'.join([e for e in i.split('by')]))
     res = '\n'.join(new_acls)
     if mod:
         res = re.sub('\{[0-9]+\}', 'olcAccess: ', res)
@@ -87,7 +91,6 @@ if __name__ == '__main__':
                                                                                     cred,
                                                                                     args.b)
     print('Executing:\n {}\n'.format(LDAP_OLC_ACL))
-
     acls = get_acl_as_list(LDAP_OLC_ACL, encoding=args.enc)
     if args.ldif:
         res = get_acl_as_ldif(acls, mod=1)
