@@ -58,7 +58,7 @@ if __name__ == '__main__':
                         default="ldapi:///",
                         help="Base LDAP Search")
     parser.add_argument('-Y', required=False,
-                    default="EXTERNAL",
+                    default="",
                     help="SASL mechanism")
     parser.add_argument('-D', required=False,
                         help="example cn:admin,dc=example,dc=org")
